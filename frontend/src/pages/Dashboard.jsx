@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://inventory-management-xbb6.onrender.com/api' : 'http://localhost:5000/api');
 
@@ -18,6 +19,45 @@ const Dashboard = () => {
             .catch(() => setStats(null))
             .finally(() => setLoading(false));
     }, [token, navigate]);
+
+    const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+    const renderCharts = () => {
+        if (!stats?.charts) return null;
+        if (stats.charts.departmentDistribution.length === 0 && stats.charts.serviceTypeDistribution.length === 0) return null;
+        
+        return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '16px', marginBottom: '16px' }}>
+                <div className="card" style={{ padding: '16px' }}>
+                    <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', textAlign: 'center' }}>Equipment per Dept</h3>
+                    <div style={{ width: '100%', height: 180 }}>
+                        <ResponsiveContainer>
+                            <PieChart>
+                                <Pie data={stats.charts.departmentDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60}>
+                                    {stats.charts.departmentDistribution.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip wrapperStyle={{fontSize: "12px", zIndex: 100}} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="card" style={{ padding: '16px' }}>
+                    <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', textAlign: 'center' }}>Service Activity</h3>
+                    <div style={{ width: '100%', height: 180 }}>
+                        <ResponsiveContainer>
+                            <BarChart data={stats.charts.serviceTypeDistribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <XAxis dataKey="name" tick={{fontSize: 9}} angle={-15} textAnchor="end" height={40} />
+                                <Tooltip wrapperStyle={{fontSize: "12px", zIndex: 100}} cursor={{fill: 'transparent'}} />
+                                <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     if (loading) return <div className="state-center"><div className="state-icon">⏳</div><p>Loading Dashboard...</p></div>;
 
@@ -76,6 +116,9 @@ const Dashboard = () => {
                         <span style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--danger)' }}>{stats?.stats?.overdueMaintenance}</span>
                     </div>
                 )}
+
+                {/* Charts Telemetry */}
+                {renderCharts()}
 
                 {/* Recent service logs */}
                 {stats?.recentLogs?.length > 0 && (
@@ -154,6 +197,9 @@ const Dashboard = () => {
                         <span style={{ fontSize: '1.8rem', fontWeight: '700', color: 'var(--danger)' }}>{stats?.stats?.overdueMaintenance}</span>
                     </div>
                 )}
+
+                {/* Charts Telemetry */}
+                {renderCharts()}
 
                 <button className="btn btn-primary btn-full" onClick={() => navigate('/devices')} style={{ marginTop: '4px' }}>
                     📋 View All Devices →

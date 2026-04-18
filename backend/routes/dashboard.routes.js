@@ -71,6 +71,29 @@ router.get('/stats', async (req, res) => {
 
         if (err4) throw err4;
 
+        // --- NEW: Chart Telemetry Aggregation ---
+        const { data: allEquipment } = await supabase.from('equipment').select('department');
+        const { data: allServices } = await supabase.from('service_history').select('service_type');
+
+        const deptCount = {};
+        if (allEquipment) {
+            allEquipment.forEach(item => {
+                const dept = item.department || 'Unassigned';
+                deptCount[dept] = (deptCount[dept] || 0) + 1;
+            });
+        }
+        
+        const serviceCount = {};
+        if (allServices) {
+            allServices.forEach(item => {
+                const type = item.service_type || 'General Service';
+                serviceCount[type] = (serviceCount[type] || 0) + 1;
+            });
+        }
+
+        const departmentDistribution = Object.keys(deptCount).map(key => ({ name: key, value: deptCount[key] }));
+        const serviceTypeDistribution = Object.keys(serviceCount).map(key => ({ name: key, value: serviceCount[key] }));
+
         res.json({
             stats: {
                 totalEquipment: totalEquipment || 0,
@@ -78,6 +101,10 @@ router.get('/stats', async (req, res) => {
                 overdueMaintenance: overdueMaintenance || 0
             },
             recentLogs: recentLogs || [],
+            charts: {
+                departmentDistribution,
+                serviceTypeDistribution
+            },
             role: 'mechanic'
         });
 
