@@ -11,7 +11,7 @@ const EquipmentDetails = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+    const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://inventory-management-xbb6.onrender.com/api' : 'http://localhost:5000/api');
 
     useEffect(() => {
         const fetchEquipmentDetails = async () => {

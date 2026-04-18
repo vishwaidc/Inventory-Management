@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { uploadServiceImage } from '../api/uploadApi';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://inventory-management-xbb6.onrender.com/api' : 'http://localhost:5000/api');
 
 // ── Image Upload Card ────────────────────────────────────────────────────────
 const ImageUploadCard = ({ label, emoji, borderColor, preview, onFile, onRemove, uploading }) => {
