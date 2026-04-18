@@ -18,13 +18,29 @@ const app = express();
 app.use(helmet());
 
 // Cross-Origin Resource Sharing (CORS) Configuration
-// Allows frontend domain to communicate with the backend
-const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173'].filter(Boolean);
-const corsOptions = {
-    origin: allowedOrigins,
-    optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+const allowedOrigins = [
+  "https://inventory-management-six-taupe.vercel.app",
+  "http://localhost:5173"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+const { createClient } = require("@supabase/supabase-js");
+
+// Initialize Supabase Client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 // Body parsing
 app.use(express.json());
@@ -52,7 +68,15 @@ app.use('/api/upload', uploadRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Medical Equipment Maintenance API is running' });
+    res.json({ message: "Server is running" });
+});
+
+// Centralized error handling wrapper
+app.use((err, req, res, next) => {
+    console.error("Express Error:", err.stack);
+    const status = err.status || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ success: false, message });
 });
 
 const PORT = process.env.PORT || 5000;
