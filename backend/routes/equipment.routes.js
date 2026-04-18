@@ -4,7 +4,7 @@ const supabase = require('../config/supabase');
 const { authenticateToken, authorizeRole } = require('../middleware/auth.middleware');
 const crypto = require('crypto');
 const QRCode = require('qrcode');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 router.use(authenticateToken);
 
