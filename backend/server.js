@@ -11,6 +11,7 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 const reportsRoutes = require('./routes/reports.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const publicRoutes = require('./routes/public.routes');
+const partsRoutes = require('./routes/parts.routes');
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/api/service', serviceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/parts', partsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

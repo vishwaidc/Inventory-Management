@@ -15,6 +15,7 @@ import EditDevice from './pages/EditDevice';
 import LogService from './pages/LogService';
 import QRScanner from './pages/QRScanner';
 import AdminReview from './pages/AdminReview';
+import Inventory from './pages/Inventory';
 
 // ─── PROTECTED ROUTE ─────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -58,6 +59,7 @@ const AppLayout = ({ children }) => {
         {isMechanic && <NavItem to="/scan" icon="📷" label="Scan" />}
         {isAdmin && <NavItem to="/add-device" icon="➕" label="Add" />}
         {isAdmin && <NavItem to="/admin/review" icon="🛡️" label="Review" />}
+        {(isAdmin || isMechanic) && <NavItem to="/inventory" icon="📦" label="Stock" />}
       </nav>
     </div>
   );
@@ -84,6 +86,7 @@ function App() {
           <Route path="/edit-device/:id" element={<ProtectedRoute><AppLayout><EditDevice /></AppLayout></ProtectedRoute>} />
           <Route path="/log-service/:id" element={<ProtectedRoute><AppLayout><LogService /></AppLayout></ProtectedRoute>} />
           <Route path="/admin/review" element={<ProtectedRoute><AppLayout><AdminReview /></AppLayout></ProtectedRoute>} />
+          <Route path="/inventory" element={<ProtectedRoute><AppLayout><Inventory /></AppLayout></ProtectedRoute>} />
 
           {/* ── Fallback ── */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -106,6 +106,30 @@ const LogService = () => {
         next_service_due: ''
     });
 
+    const [availableParts, setAvailableParts] = useState([]);
+    const [usedParts, setUsedParts] = useState([]);
+
+    useEffect(() => {
+        if (token) {
+            axios.get(`${API}/parts`, { headers: { Authorization: `Bearer ${token}` } })
+                .then(r => setAvailableParts(r.data))
+                .catch(console.error);
+        }
+    }, [token]);
+
+    const addPart = (partId) => {
+        if (!partId) return;
+        const part = availableParts.find(p => p.id === partId);
+        if (!part) return;
+        setUsedParts(prev => {
+            if (prev.find(p => p.part_id === part.id)) return prev;
+            return [...prev, { part_id: part.id, name: part.part_name, quantity: 1 }];
+        });
+    };
+
+    const removeUsedPart = (partId) => setUsedParts(prev => prev.filter(p => p.part_id !== partId));
+    const setUsedPartQty = (partId, qty) => setUsedParts(prev => prev.map(p => p.part_id === partId ? { ...p, quantity: parseInt(qty) || 1 } : p));
+
     // Image states
     const [beforeFile, setBeforeFile] = useState(null);
     const [afterFile, setAfterFile] = useState(null);
@@ -160,10 +184,18 @@ const LogService = () => {
             return;
         }
         setError(''); setLoading(true);
+        
+        const finalForm = { ...form };
+        const autoPartsStr = usedParts.map(p => `${p.name} (x${p.quantity})`).join(', ');
+        if (autoPartsStr) {
+            finalForm.parts_replaced = finalForm.parts_replaced ? `${finalForm.parts_replaced}, ${autoPartsStr}` : autoPartsStr;
+        }
+
         try {
             await axios.post(`${API}/service`, {
                 equipment_id: id,
-                ...form,
+                ...finalForm,
+                parts_used: usedParts,
                 before_image_url: beforeUrl || null,
                 after_image_url: afterUrl || null,
             }, { headers: { Authorization: `Bearer ${token}` } });
@@ -287,8 +319,27 @@ const LogService = () => {
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Parts Replaced</label>
-                        <input className="form-input" value={form.parts_replaced} onChange={set('parts_replaced')} placeholder="e.g. Battery, Sensor Probe, Cable..." />
+                        <label className="form-label">Parts Replaced / Used (Inventory Deduction)</label>
+                        <select className="form-select" onChange={(e) => { addPart(e.target.value); e.target.value = ""; }} defaultValue="">
+                            <option value="" disabled>-- Select Part from Warehouse --</option>
+                            {availableParts.map(p => (
+                                <option key={p.id} value={p.id} disabled={p.quantity <= 0}>
+                                    {p.part_name} (Stock: {p.quantity})
+                                </option>
+                            ))}
+                        </select>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                            {usedParts.map(p => (
+                                <div key={p.part_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg)', padding: '8px 12px', borderRadius: '6px' }}>
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{p.name}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <input type="number" min="1" className="form-input" style={{ width: '60px', padding: '4px' }} value={p.quantity} onChange={(e) => setUsedPartQty(p.part_id, e.target.value)} />
+                                        <button type="button" onClick={() => removeUsedPart(p.part_id)} style={{ border: 'none', background: 'transparent', color: 'var(--danger)', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <input className="form-input" style={{ marginTop: '10px' }} value={form.parts_replaced} onChange={set('parts_replaced')} placeholder="Other unlisted parts used..." />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>

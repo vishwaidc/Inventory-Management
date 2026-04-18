@@ -47,6 +47,17 @@ CREATE TABLE IF NOT EXISTS service_history (
     created_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ── 4. PARTS INVENTORY TABLE ──────────────────────────────────
+CREATE TABLE IF NOT EXISTS parts_inventory (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    part_name     VARCHAR(255) NOT NULL,
+    part_number   VARCHAR(255) UNIQUE,
+    quantity      INTEGER DEFAULT 0,
+    threshold     INTEGER DEFAULT 5,
+    created_at    TIMESTAMPTZ DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ── INDEXES (for fast lookups) ────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_equipment_customer_id    ON equipment(customer_id);
 CREATE INDEX IF NOT EXISTS idx_service_equipment_id     ON service_history(equipment_id);
@@ -57,6 +68,7 @@ CREATE INDEX IF NOT EXISTS idx_users_email              ON users(email);
 ALTER TABLE users          DISABLE ROW LEVEL SECURITY;
 ALTER TABLE equipment      DISABLE ROW LEVEL SECURITY;
 ALTER TABLE service_history DISABLE ROW LEVEL SECURITY;
+ALTER TABLE parts_inventory DISABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- IF TABLES ALREADY EXIST — run only the ALTER statements below

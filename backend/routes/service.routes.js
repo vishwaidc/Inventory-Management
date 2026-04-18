@@ -7,7 +7,7 @@ router.use(authenticateToken);
 
 // POST /api/service — log new service (mechanic only), always starts as pending_review
 router.post('/', authorizeRole(['mechanic']), async (req, res) => {
-    const { equipment_id, service_type, issue_reported, work_done, parts_replaced, status, next_service_due, before_image_url, after_image_url } = req.body;
+    const { equipment_id, service_type, issue_reported, work_done, parts_replaced, parts_used, status, next_service_due, before_image_url, after_image_url } = req.body;
     const technician_id = req.user.id;
 
     if (!equipment_id) return res.status(400).json({ error: 'equipment_id is required' });
@@ -22,6 +22,23 @@ router.post('/', authorizeRole(['mechanic']), async (req, res) => {
             const d = new Date(); d.setMonth(d.getMonth() + 6);
             return d.toISOString().split('T')[0];
         })();
+
+        // Hardware Auto-Deduction execution
+        if (parts_used && Array.isArray(parts_used)) {
+            for (const item of parts_used) {
+                if (!item.part_id) continue;
+                const { data: partInfo, error: pErr } = await supabase
+                    .from('parts_inventory')
+                    .select('quantity')
+                    .eq('id', item.part_id)
+                    .single();
+                
+                if (partInfo && !pErr) {
+                    const newQty = partInfo.quantity - (item.quantity || 1);
+                    await supabase.from('parts_inventory').update({ quantity: newQty < 0 ? 0 : newQty }).eq('id', item.part_id);
+                }
+            }
+        }
 
         const { data, error } = await supabase
             .from('service_history')

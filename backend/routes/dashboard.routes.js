@@ -94,6 +94,17 @@ router.get('/stats', async (req, res) => {
         const departmentDistribution = Object.keys(deptCount).map(key => ({ name: key, value: deptCount[key] }));
         const serviceTypeDistribution = Object.keys(serviceCount).map(key => ({ name: key, value: serviceCount[key] }));
 
+        // --- NEW: Low Stock Inventory Logic ---
+        const { data: allParts } = await supabase.from('parts_inventory').select('*');
+        const lowStockItems = [];
+        if (allParts) {
+            allParts.forEach(p => {
+                if (p.quantity <= (p.threshold || 5)) {
+                    lowStockItems.push(p);
+                }
+            });
+        }
+
         res.json({
             stats: {
                 totalEquipment: totalEquipment || 0,
@@ -105,6 +116,7 @@ router.get('/stats', async (req, res) => {
                 departmentDistribution,
                 serviceTypeDistribution
             },
+            lowStockItems,
             role: 'mechanic'
         });
 
