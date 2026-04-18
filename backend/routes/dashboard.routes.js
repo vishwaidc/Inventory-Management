@@ -63,8 +63,8 @@ router.get('/stats', async (req, res) => {
                 service_date,
                 service_type,
                 status,
-                equipment:equipment_id(equipment_name, department),
-                technician:technician_id(name)
+                equipment:equipment!equipment_id(equipment_name, department),
+                technician:users!technician_id(name)
             `)
             .order('service_date', { ascending: false })
             .limit(5);

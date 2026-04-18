@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     try {
         let query = supabase
             .from('equipment')
-            .select('*, customer:customer_id(name, email), service_history(id, service_date, status)')
+            .select('*, customer:users!customer_id(name, email), service_history(id, service_date, status)')
             .order('created_at', { ascending: false });
 
         // Customer: only their devices
@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
             .from('equipment')
             .select(`
                 *,
-                customer:customer_id(id, name, email),
+                customer:users!customer_id(id, name, email),
                 service_history(
                     id, service_date, service_type, issue_reported,
                     work_done, parts_replaced, status, next_service_due, created_at,
@@ -126,7 +126,7 @@ router.post('/', authorizeRole(['mechanic']), async (req, res) => {
                 customer_id: customerId,
                 qr_code_value: equipmentPageUrl  // short URL stored in DB
             }])
-            .select(`*, customer:customer_id(name, email)`)
+            .select(`*, customer:users!customer_id(name, email)`)
             .single();
 
         if (error) throw error;
@@ -166,7 +166,7 @@ router.put('/:id', authorizeRole(['mechanic']), async (req, res) => {
                 last_service_date: last_service_date || null
             })
             .eq('id', req.params.id)
-            .select('*, customer:customer_id(name, email)')
+            .select('*, customer:users!customer_id(name, email)')
             .single();
 
         if (error) throw error;

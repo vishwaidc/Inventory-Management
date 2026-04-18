@@ -15,7 +15,7 @@ router.get('/equipment/:id', async (req, res) => {
                     id, service_date, service_type, work_done,
                     parts_replaced, status, next_service_due,
                     approval_status,
-                    technician:technician_id(name)
+                    technician:users!technician_id(name)
                 )
             `)
             .eq('id', req.params.id)

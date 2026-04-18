@@ -52,7 +52,7 @@ router.post('/', authorizeRole(['mechanic']), async (req, res) => {
                 after_image_url: after_image_url || null,
                 approval_status: 'pending_review',
             }])
-            .select('*, technician:technician_id(name, email)')
+            .select('*, technician:users!technician_id(name, email)')
             .single();
 
         if (error) throw error;
@@ -71,8 +71,8 @@ router.get('/pending', authorizeRole(['admin']), async (req, res) => {
             .from('service_history')
             .select(`
                 *,
-                technician:technician_id(name, email),
-                equipment:equipment_id(equipment_name, brand, model_number, serial_number, department, location)
+                technician:users!technician_id(name, email),
+                equipment:equipment!equipment_id(equipment_name, brand, model_number, serial_number, department, location)
             `)
             .eq('approval_status', 'pending_review')
             .order('created_at', { ascending: false });
@@ -122,7 +122,7 @@ router.get('/:equipmentId', async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('service_history')
-            .select('*, technician:technician_id(name, email)')
+            .select('*, technician:users!technician_id(name, email)')
             .eq('equipment_id', req.params.equipmentId)
             .in('approval_status', ['approved', 'pending_review'])
             .order('service_date', { ascending: false });
@@ -142,7 +142,7 @@ router.put('/:id', authorizeRole(['mechanic']), async (req, res) => {
             .from('service_history')
             .update({ service_type, issue_reported, work_done, parts_replaced, status, next_service_due })
             .eq('id', req.params.id)
-            .select('*, technician:technician_id(name, email)').single();
+            .select('*, technician:users!technician_id(name, email)').single();
 
         if (error) throw error;
         res.json(data);
