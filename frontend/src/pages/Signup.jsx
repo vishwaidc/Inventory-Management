@@ -31,7 +31,8 @@ const Signup = () => {
             login(token, user);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.error || 'Registration failed. Please try again.');
+            const msg = err.response?.data?.error || (err.response?.data?.errors ? err.response.data.errors.join(', ') : null) || 'Registration failed. Please try again.';
+            setError(msg);
         } finally {
             setLoading(false);
         }

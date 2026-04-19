@@ -41,7 +41,8 @@ const Login = () => {
             login(token, user);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.error || 'Invalid email or password.');
+            const msg = err.response?.data?.error || (err.response?.data?.errors ? err.response.data.errors.join(', ') : null) || 'Invalid email or password.';
+            setError(msg);
         } finally {
             setLoading(false);
         }
