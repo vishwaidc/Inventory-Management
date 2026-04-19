@@ -15,7 +15,7 @@ const AddDevice = () => {
     const [form, setForm] = useState({
         equipment_name: '', brand: '', model_number: '', serial_number: '',
         purchase_date: '', warranty_expiry: '', department: '', location: '',
-        last_service_date: '', customer_email: '', customer_name: ''
+        last_service_date: ''
     });
 
     const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
@@ -40,12 +40,6 @@ const AddDevice = () => {
             <div className="page">
                 <div className="alert alert-success">✅ Device added successfully!</div>
 
-                {success.customer_created && (
-                    <div className="alert alert-info">
-                        👤 New customer account created for <strong>{form.customer_email}</strong><br />
-                        Default password: <code style={{ background: '#1e40af22', padding: '2px 6px', borderRadius: '4px' }}>password123</code>
-                    </div>
-                )}
 
                 {/* QR Code */}
                 <div className="qr-container">
@@ -72,13 +66,11 @@ const AddDevice = () => {
                         {success.model_number && <><span style={{ color: 'var(--text-muted)' }}>Model</span><span style={{ fontWeight: '600' }}>{success.model_number}</span></>}
                         {success.serial_number && <><span style={{ color: 'var(--text-muted)' }}>Serial</span><span style={{ fontWeight: '600' }}>{success.serial_number}</span></>}
                         {success.warranty_expiry && <><span style={{ color: 'var(--text-muted)' }}>Warranty</span><span style={{ fontWeight: '600' }}>{success.warranty_expiry}</span></>}
-                        <span style={{ color: 'var(--text-muted)' }}>Customer</span>
-                        <span style={{ fontWeight: '600' }}>{success.customer?.email}</span>
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-                    <button className="btn btn-outline btn-full" onClick={() => { setSuccess(null); setForm({ equipment_name: '', brand: '', model_number: '', serial_number: '', purchase_date: '', warranty_expiry: '', department: '', location: '', last_service_date: '', customer_email: '', customer_name: '' }); }}>
+                    <button className="btn btn-outline btn-full" onClick={() => { setSuccess(null); setForm({ equipment_name: '', brand: '', model_number: '', serial_number: '', purchase_date: '', warranty_expiry: '', department: '', location: '', last_service_date: '' }); }}>
                         ➕ Add Another
                     </button>
                     <button className="btn btn-primary btn-full" onClick={() => navigate(`/device/${success.id}`)}>
@@ -95,7 +87,7 @@ const AddDevice = () => {
                 <div className="banner-icon">🔧</div>
                 <div>
                     <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Add New Device</h2>
-                    <p style={{ margin: 0, opacity: 0.85, fontSize: '0.82rem' }}>Fill in device details and link to a customer</p>
+                    <p style={{ margin: 0, opacity: 0.85, fontSize: '0.82rem' }}>Fill in device details</p>
                 </div>
             </div>
 
@@ -155,21 +147,6 @@ const AddDevice = () => {
                     </div>
                 </div>
 
-                {/* Customer */}
-                <div className="card">
-                    <div className="card-header"><h3 style={{ fontSize: '0.95rem' }}>👤 Customer Details</h3></div>
-                    <div className="alert alert-info" style={{ marginBottom: '12px' }}>
-                        If the customer doesn't have an account, one will be created with password <strong>password123</strong>
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Customer Email *</label>
-                        <input type="email" className="form-input" required value={form.customer_email} onChange={set('customer_email')} placeholder="customer@email.com" />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Customer Name (if new)</label>
-                        <input className="form-input" value={form.customer_name} onChange={set('customer_name')} placeholder="Full Name" />
-                    </div>
-                </div>
 
                 <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
                     {loading ? '⏳ Adding Device...' : '✅ Add Device & Generate QR'}

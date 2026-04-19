@@ -69,42 +69,12 @@ router.post('/', authorizeRole(['admin', 'mechanic']), async (req, res) => {
     const {
         equipment_name, brand, model_number, serial_number,
         purchase_date, warranty_expiry, department, location,
-        last_service_date, customer_email, customer_name
+        last_service_date
     } = req.body;
 
     if (!equipment_name) return res.status(400).json({ error: 'Equipment name is required' });
-    if (!customer_email) return res.status(400).json({ error: 'Customer email is required' });
 
     try {
-        // Find or create customer account with default password
-        let customerId = null;
-        const { data: existingUser } = await supabase
-            .from('users')
-            .select('id')
-            .eq('email', customer_email)
-            .single();
-
-        if (existingUser) {
-            customerId = existingUser.id;
-        } else {
-            // Auto-create customer with default password
-            const defaultPassword = 'password123';
-            const passwordHash = await bcrypt.hash(defaultPassword, 10);
-            const { data: newUser, error: userError } = await supabase
-                .from('users')
-                .insert([{
-                    name: customer_name || customer_email.split('@')[0],
-                    email: customer_email,
-                    password_hash: passwordHash,
-                    role: 'customer'
-                }])
-                .select('id')
-                .single();
-
-            if (userError) throw userError;
-            customerId = newUser.id;
-        }
-
         // Generate UUID and build equipment page URL for QR
         const equipmentId = crypto.randomUUID();
         const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -123,22 +93,20 @@ router.post('/', authorizeRole(['admin', 'mechanic']), async (req, res) => {
                 department,
                 location,
                 last_service_date: last_service_date || null,
-                customer_id: customerId,
-                qr_code_value: equipmentPageUrl  // short URL stored in DB
+                customer_id: null,
+                qr_code_value: equipmentPageUrl
             }])
-            .select(`*, customer:users!customer_id(name, email)`)
+            .select(`*, service_history(id, status)`)
             .single();
 
         if (error) throw error;
 
-        // Generate QR image AFTER insert — returned in API response, not stored in DB
+        // Generate QR image AFTER insert
         const qrCodeDataUrl = await QRCode.toDataURL(equipmentPageUrl, { width: 300, margin: 2 });
 
         res.status(201).json({
             ...data,
-            qr_code_image: qrCodeDataUrl,   // base64 image for immediate display
-            customer_created: !existingUser,
-            customer_default_password: !existingUser ? 'password123' : undefined
+            qr_code_image: qrCodeDataUrl
         });
     } catch (error) {
         console.error('Add Equipment Error:', error);
