@@ -28,9 +28,9 @@ const Dashboard = () => {
         
         return (
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '16px', marginBottom: '16px' }}>
-                <div className="card" style={{ padding: '16px' }}>
+                <div className="card" style={{ padding: '16px', minWidth: 0 }}>
                     <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', textAlign: 'center' }}>Equipment per Dept</h3>
-                    <div style={{ width: '100%', height: 180 }}>
+                    <div style={{ width: '100%', height: 180, minWidth: 0 }}>
                         <ResponsiveContainer>
                             <PieChart>
                                 <Pie data={stats.charts.departmentDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60}>
@@ -43,9 +43,9 @@ const Dashboard = () => {
                         </ResponsiveContainer>
                     </div>
                 </div>
-                <div className="card" style={{ padding: '16px' }}>
+                <div className="card" style={{ padding: '16px', minWidth: 0 }}>
                     <h3 style={{ fontSize: '0.9rem', marginBottom: '8px', textAlign: 'center' }}>Service Activity</h3>
-                    <div style={{ width: '100%', height: 180 }}>
+                    <div style={{ width: '100%', height: 180, minWidth: 0 }}>
                         <ResponsiveContainer>
                             <BarChart data={stats.charts.serviceTypeDistribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <XAxis dataKey="name" tick={{fontSize: 9}} angle={-15} textAnchor="end" height={40} />

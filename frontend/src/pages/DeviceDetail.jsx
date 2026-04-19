@@ -19,6 +19,9 @@ const DeviceDetail = () => {
     const [showQR, setShowQR] = useState(false);
     const [qrImageUrl, setQrImageUrl] = useState('');
     const [lightboxImage, setLightboxImage] = useState(null);
+    const [reportLoading, setReportLoading] = useState(null);
+    const [reportError, setReportError] = useState('');
+    const [reportSuccess, setReportSuccess] = useState('');
 
     const load = () => {
         setLoading(true);
