@@ -63,9 +63,9 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST /api/equipment — add new device (mechanic only)
+// POST /api/equipment — add new device (admin/mechanic only)
 // Also creates a customer account (if email doesn't exist) with default password
-router.post('/', authorizeRole(['mechanic']), async (req, res) => {
+router.post('/', authorizeRole(['admin', 'mechanic']), async (req, res) => {
     const {
         equipment_name, brand, model_number, serial_number,
         purchase_date, warranty_expiry, department, location,
@@ -148,8 +148,8 @@ router.post('/', authorizeRole(['mechanic']), async (req, res) => {
 });
 
 
-// PUT /api/equipment/:id — update device details (mechanic only)
-router.put('/:id', authorizeRole(['mechanic']), async (req, res) => {
+// PUT /api/equipment/:id — update device details (admin/mechanic only)
+router.put('/:id', authorizeRole(['admin', 'mechanic']), async (req, res) => {
     const {
         equipment_name, brand, model_number, serial_number,
         purchase_date, warranty_expiry, department, location, last_service_date
@@ -176,8 +176,8 @@ router.put('/:id', authorizeRole(['mechanic']), async (req, res) => {
     }
 });
 
-// DELETE /api/equipment/:id — mechanic only
-router.delete('/:id', authorizeRole(['mechanic']), async (req, res) => {
+// DELETE /api/equipment/:id — admin/mechanic only
+router.delete('/:id', authorizeRole(['admin', 'mechanic']), async (req, res) => {
     try {
         const { error } = await supabase.from('equipment').delete().eq('id', req.params.id);
         if (error) throw error;

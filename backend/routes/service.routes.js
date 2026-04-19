@@ -5,8 +5,8 @@ const { authenticateToken, authorizeRole } = require('../middleware/auth.middlew
 
 router.use(authenticateToken);
 
-// POST /api/service — log new service (mechanic only), always starts as pending_review
-router.post('/', authorizeRole(['mechanic']), async (req, res) => {
+// POST /api/service — log new service (admin/mechanic only), always starts as pending_review
+router.post('/', authorizeRole(['admin', 'mechanic']), async (req, res) => {
     const { equipment_id, service_type, issue_reported, work_done, parts_replaced, parts_used, status, next_service_due, before_image_url, after_image_url } = req.body;
     const technician_id = req.user.id;
 
@@ -134,8 +134,8 @@ router.get('/:equipmentId', async (req, res) => {
     }
 });
 
-// PUT /api/service/:id — update service record (mechanic only)
-router.put('/:id', authorizeRole(['mechanic']), async (req, res) => {
+// PUT /api/service/:id — update service record (admin/mechanic only)
+router.put('/:id', authorizeRole(['admin', 'mechanic']), async (req, res) => {
     const { service_type, issue_reported, work_done, parts_replaced, status, next_service_due } = req.body;
     try {
         const { data, error } = await supabase
